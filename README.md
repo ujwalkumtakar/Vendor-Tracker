@@ -1,293 +1,494 @@
-# Vendor Tracker - Full-Stack AWS App with React and CDK
+# Vendor Tracker
 
-A full-stack vendor management application built with Next.js, AWS CDK, Lambda, DynamoDB, and Cognito. Built as a learning reference for frontend developers transitioning into cloud and serverless development.
+A full-stack serverless vendor management application built with **Next.js, TypeScript, AWS CDK, AWS Lambda, DynamoDB, Amazon Cognito, API Gateway, S3, and CloudFront**.
 
-<!-- > **Full tutorial:** [Insert article title + link] -->
+The project demonstrates how to build and deploy a secure, scalable CRUD application on AWS using **Infrastructure as Code (IaC)** with AWS CDK.
 
----
+## 🚀 Features
 
-## Project Overview
+* 🔐 User authentication with **Amazon Cognito**
+* 🔑 JWT-based authorization for protected API endpoints
+* ➕ Create vendor records
+* 📋 View vendor records
+* 🗑️ Delete vendor records
+* ⚡ Serverless backend using AWS Lambda
+* 🗄️ Vendor data stored in Amazon DynamoDB
+* 🌐 REST API using Amazon API Gateway
+* ☁️ Frontend hosting with Amazon S3 and CloudFront
+* 🏗️ AWS infrastructure defined using **AWS CDK**
+* 📦 TypeScript-based frontend and backend
+* 🔒 Protected API routes with Cognito authorization
 
-Vendor Tracker is a CRUD application that lets authenticated users create, read, and delete vendor records stored in DynamoDB. The entire backend infrastructure is defined as TypeScript code using AWS CDK and deploys with a single command.
+## 🏗️ Architecture
 
-**Who this is for:**
-Frontend developers who understand React and want a concrete, working example of a serverless AWS backend, with authentication, that they can clone, deploy, and modify.
-
-**Core features:**
-- Create, read, and delete vendor records
-- JWT-based authentication via Amazon Cognito
-- Protected API routes - unauthenticated requests are rejected at the API Gateway level
-- Infrastructure defined as code (no clicking through the AWS Console to deploy)
-- Frontend deployed to CloudFront with HTTPS out of the box
-
----
-
-## Architecture Overview
-
+```text
+                    ┌─────────────────┐
+                    │     Browser     │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   CloudFront    │
+                    │  + S3 Frontend  │
+                    └────────┬────────┘
+                             │
+                             │ API Requests
+                             ▼
+                    ┌─────────────────┐
+                    │  API Gateway    │
+                    │  REST API       │
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │ Cognito Authorizer│
+                    │   JWT Validation │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │     Lambda      │
+                    │ Node.js/TS      │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │    DynamoDB     │
+                    │  Vendor Table   │
+                    └─────────────────┘
 ```
-Browser → CloudFront → API Gateway → Lambda → DynamoDB
-                            ↑
-                         Cognito
-                      (JWT Validation)
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+* AWS Amplify
+* `@aws-amplify/ui-react`
+
+### Backend
+
+* AWS Lambda
+* Node.js
+* TypeScript
+* Amazon API Gateway
+* Amazon DynamoDB
+
+### Authentication
+
+* Amazon Cognito
+* JWT Authentication
+* Cognito Authorizer
+
+### AWS Infrastructure
+
+* AWS CDK
+* Amazon S3
+* Amazon CloudFront
+* IAM
+* API Gateway
+* Lambda
+* DynamoDB
+* Cognito
+
+### Build
+
+* esbuild
+* AWS CDK `NodejsFunction`
+
+## 📁 Project Structure
+
+```text
+Vendor-Tracker/
+│
+├── backend/
+│   ├── lambda/
+│   │   ├── createVendor.ts
+│   │   └── getVendors.ts
+│   │
+│   ├── lib/
+│   │   └── backend-stack.ts
+│   │
+│   ├── cdk.json
+│   └── package.json
+│
+├── frontend/
+│   ├── app/
+│   │   ├── page.tsx
+│   │   └── providers.tsx
+│   │
+│   ├── lib/
+│   │   └── api.ts
+│   │
+│   ├── types/
+│   │   └── vendor.ts
+│   │
+│   ├── next.config.js
+│   └── package.json
+│
+└── README.md
 ```
 
-The React frontend is served through CloudFront as a static export. API requests go through API Gateway, which validates the user's Cognito JWT token before routing the request to the appropriate Lambda function. Lambda reads and writes to a DynamoDB table. Unauthenticated requests are rejected before they reach Lambda.
+## 🔄 Application Flow
 
-For a full explanation of each layer, the request lifecycle, and the reasoning behind infrastructure decisions, see the complete tutorial: [How to Build a Full-Stack CRUD App with React, AWS Lambda, DynamoDB, and Cognito Auth](https://www.freecodecamp.org/news/full-stack-aws-react-lambda-dynamodb-tutorial)]
+1. User opens the Vendor Tracker application.
+2. User signs up or signs in using Amazon Cognito.
+3. Cognito authenticates the user and provides a JWT token.
+4. The frontend retrieves the authentication session using AWS Amplify.
+5. The JWT token is included in the `Authorization` header for protected API requests.
+6. API Gateway validates the JWT using the Cognito Authorizer.
+7. Valid requests are forwarded to AWS Lambda.
+8. Lambda performs the required operation on DynamoDB.
+9. The response is returned through API Gateway to the frontend.
 
----
+```text
+User
+  ↓
+Cognito Login
+  ↓
+JWT Token
+  ↓
+Next.js Frontend
+  ↓
+API Gateway
+  ↓
+Cognito JWT Validation
+  ↓
+Lambda
+  ↓
+DynamoDB
+```
 
-## Tech Stack
+## 🔐 Authentication & Authorization
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js (TypeScript, Tailwind CSS) |
-| Auth UI | AWS Amplify (`aws-amplify`, `@aws-amplify/ui-react`) |
-| Infrastructure | AWS CDK (TypeScript) |
-| API | Amazon API Gateway (REST) |
-| Server logic | AWS Lambda (Node.js 18.x, via `NodejsFunction`) |
-| Database | Amazon DynamoDB |
-| Authentication | Amazon Cognito (User Pool) |
-| Hosting | Amazon S3 + Amazon CloudFront |
-| Bundler | esbuild (via CDK `NodejsFunction`) |
+Amazon Cognito is used to manage user authentication.
 
----
+Protected API requests include a JWT token:
 
-## Prerequisites
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
 
-Before you begin, ensure you have the following installed and configured:
+API Gateway validates the token before allowing the request to reach Lambda.
 
-- **Node.js** v18 or later
-- **npm** v9 or later
-- An **AWS account** ([create one here](https://aws.amazon.com))
-- **AWS CLI** installed and configured with a user that has `AdministratorAccess`
+If the token is missing, invalid, or expired:
+
+```http
+401 Unauthorized
+```
+
+This prevents unauthorized users from accessing protected API operations.
+
+> Note: The GET `/vendors` endpoint is intentionally left public in the current learning implementation. POST and DELETE operations require authentication.
+
+## 📡 API Endpoints
+
+| Method   | Endpoint        | Description      | Authentication |
+| -------- | --------------- | ---------------- | -------------- |
+| `GET`    | `/vendors`      | Retrieve vendors | Public*        |
+| `POST`   | `/vendors`      | Create a vendor  | Required       |
+| `DELETE` | `/vendors/{id}` | Delete a vendor  | Required       |
+
+*The GET endpoint can also be protected through the Cognito authorizer if required.
+
+## ⚙️ Prerequisites
+
+Before running the project, install:
+
+* Node.js 18+
+* npm 9+
+* AWS CLI
+* AWS CDK v2
+* An AWS account
+
+Verify Node.js:
 
 ```bash
-# Verify AWS CLI is installed
+node --version
+```
+
+Verify npm:
+
+```bash
+npm --version
+```
+
+Verify AWS CLI:
+
+```bash
 aws --version
-
-# Configure with your IAM credentials
-aws configure
 ```
 
-- **AWS CDK** v2 installed globally
+Verify CDK:
 
 ```bash
-npm install -g aws-cdk
-
-# Verify
 cdk --version
 ```
 
-> If you haven't set up your IAM user or AWS CLI credentials yet, the tutorial covers this in detail: [How to Build a Full-Stack CRUD App with React, AWS Lambda, DynamoDB, and Cognito Auth](https://www.freecodecamp.org/news/full-stack-aws-react-lambda-dynamodb-tutorial)
+## 🔑 Configure AWS CLI
 
----
-
-## Local Development Setup
-
-### 1. Clone the repository
+Configure your AWS credentials:
 
 ```bash
-git clone https://github.com/BenedictaUche/vendor-tracker.git
-cd vendor-tracker
+aws configure
 ```
 
-### 2. Install backend dependencies
+You will be prompted for:
+
+```text
+AWS Access Key ID
+AWS Secret Access Key
+Default region name
+Default output format
+```
+
+Make sure the AWS identity you're using has sufficient permissions to deploy the required resources.
+
+## 📦 Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/Vendor-Tracker.git
+cd Vendor-Tracker
+```
+
+### Install backend dependencies
 
 ```bash
 cd backend
 npm install
 ```
 
-### 3. Install frontend dependencies
+### Install frontend dependencies
 
 ```bash
 cd ../frontend
 npm install
 ```
 
-### 4. Environment variables
+## 🌎 Environment Configuration
 
-The frontend requires your deployed API Gateway URL and Cognito IDs. These are output by `cdk deploy` (see Deployment Steps below).
+Create:
 
-Create a file at `frontend/.env.local`:
-
-```bash
-NEXT_PUBLIC_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/prod
+```text
+frontend/.env.local
 ```
 
-Cognito IDs are configured directly in `frontend/app/providers.tsx`:
+Add your deployed API Gateway URL:
+
+```env
+NEXT_PUBLIC_API_URL=https://YOUR_API_ID.execute-api.YOUR_REGION.amazonaws.com/prod
+```
+
+Configure your Cognito User Pool details in:
+
+```text
+frontend/app/providers.tsx
+```
+
+Example:
 
 ```typescript
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: 'us-east-1_xxxxxxxxx',
-      userPoolClientId: 'xxxxxxxxxxxxxxxxxxxx',
-    }
-  }
-}, { ssr: true });
+      userPoolId: "YOUR_USER_POOL_ID",
+      userPoolClientId: "YOUR_USER_POOL_CLIENT_ID",
+    },
+  },
+});
 ```
 
-### 5. Run the frontend locally
+> Never commit AWS access keys, secret keys, passwords, or other sensitive credentials to GitHub.
 
-```bash
-cd frontend
-npm run dev
-```
+## ☁️ AWS Deployment
 
-The app will be available at `http://localhost:3000`. Note that the backend must be deployed to AWS before the frontend can create or retrieve vendors — there is no local emulation of Lambda or DynamoDB in this setup.
+### 1. Bootstrap AWS CDK
 
----
-
-## Deployment Steps
-
-### Step 1: Bootstrap your AWS environment
-
-This is a one-time setup per AWS account and region. It creates the S3 bucket CDK uses to stage assets before deployment.
+From the backend directory:
 
 ```bash
 cd backend
 cdk bootstrap
 ```
 
-### Step 2: Build the frontend
+CDK bootstrap is generally required once per AWS account and region.
 
-The CDK stack copies the built frontend files to S3 during deployment. Build them first:
+### 2. Build the frontend
+
+From the frontend directory:
 
 ```bash
 cd frontend
 npm run build
 ```
 
-This generates a static export in `frontend/out/`.
+This generates the static frontend output.
 
-### Step 3: Deploy the stack
+### 3. Deploy the AWS infrastructure
+
+From the backend directory:
 
 ```bash
 cd backend
 cdk deploy
 ```
 
-CDK will display a summary of resources it is about to create and prompt for confirmation. Type `y` to proceed.
+Review the resources and confirm the deployment when prompted.
 
-**Resources created by this deployment:**
+### Resources Created
 
-- DynamoDB table (`VendorTable`)
-- Lambda functions (`createVendor`, `getVendors`)
-- API Gateway REST API with `/vendors` resource (GET, POST, DELETE)
-- Cognito User Pool and App Client
-- Cognito domain prefix
-- S3 bucket for frontend assets
-- CloudFront distribution
-- IAM roles and policies for each Lambda
+The CDK stack provisions resources including:
 
-### Step 4: Note the outputs
+* Amazon DynamoDB table
+* AWS Lambda functions
+* Amazon API Gateway REST API
+* Amazon Cognito User Pool
+* Cognito App Client
+* S3 bucket
+* CloudFront distribution
+* IAM roles and policies
 
-After deployment, the terminal will display:
+After deployment, CDK provides outputs such as:
 
-```
-Outputs:
-VendorStack.ApiEndpoint         = https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/prod/
-VendorStack.UserPoolId          = us-east-1_xxxxxxxxx
-VendorStack.UserPoolClientId    = xxxxxxxxxxxxxxxxxxxx
-VendorStack.CloudFrontURL       = xxxxxxxxxx.cloudfront.net
-```
-
-Copy these values into `frontend/app/providers.tsx` and `frontend/.env.local`, then rebuild and redeploy if you are hosting the frontend via CloudFront.
-
----
-
-## Project Structure
-
-```
-vendor-tracker/
-├── backend/
-│   ├── lambda/
-│   │   ├── createVendor.ts     # POST handler — writes vendor to DynamoDB
-│   │   └── getVendors.ts       # GET handler — scans and returns all vendors
-│   ├── lib/
-│   │   └── backend-stack.ts    # CDK stack — all infrastructure defined here
-│   ├── cdk.json
-│   └── package.json
-│
-└── frontend/
-    ├── app/
-    │   ├── page.tsx            # Main page — vendor form and list
-    │   └── providers.tsx       # Amplify configuration
-    ├── lib/
-    │   └── api.ts              # API service layer — all fetch calls live here
-    ├── types/
-    │   └── vendor.ts           # Vendor TypeScript interface
-    ├── next.config.js          # Static export configuration
-    └── package.json
+```text
+ApiEndpoint
+UserPoolId
+UserPoolClientId
+CloudFrontURL
 ```
 
-**Key files to understand first:**
+Use these values to configure the frontend.
 
-- `backend/lib/backend-stack.ts` — the single source of truth for all AWS infrastructure. Read this alongside the tutorial to understand how CDK constructs map to real AWS resources.
-- `frontend/lib/api.ts` — all communication with the backend. Auth token retrieval and `fetch` calls are centralised here.
-- `frontend/app/providers.tsx` — Amplify configuration. Your Cognito IDs go here.
+## 💻 Run Locally
 
----
+Start the Next.js development server:
 
-## Authentication Flow
+```bash
+cd frontend
+npm run dev
+```
 
-1. The user signs in through the Amplify UI (`withAuthenticator` HOC)
-2. Cognito validates the credentials and returns a JWT Identity Token
-3. Amplify stores the token in browser storage
-4. On every protected API call, `fetchAuthSession()` retrieves the token
-5. The token is attached to the `Authorization` header of the request
-6. API Gateway's Cognito Authorizer validates the token before the request reaches Lambda
-7. If the token is missing or expired, API Gateway returns `401 Unauthorized` — Lambda is never invoked
+Open:
 
-The GET endpoint (`getVendors`) is intentionally left unprotected in this reference implementation. The POST and DELETE endpoints require a valid token. To protect all endpoints, apply the authorizer to the GET method in `backend-stack.ts` following the same pattern used for POST.
+```text
+http://localhost:3000
+```
 
----
+The frontend can run locally while communicating with the deployed AWS backend.
 
-## Common Issues
+## 🧪 Testing the API
 
-**502 Bad Gateway on POST /vendors**
+You can test the API using tools such as:
 
-The Lambda is crashing before it can respond. The most common cause is a missing `TABLE_NAME` environment variable or an incorrect handler path in the CDK stack. Open CloudWatch → Log Groups → find your Lambda's log group → read the most recent log stream for the exact error.
+* Postman
+* Browser DevTools
+* curl
 
-Full diagnosis steps and the fix are documented here: [Insert troubleshooting article title + link].
+Example:
 
----
+```bash
+curl https://YOUR_API_URL/vendors
+```
 
-**User stuck as "Unconfirmed" after sign-up**
+For protected endpoints, include the JWT:
 
-Cognito requires email verification before allowing login. During development, you can manually confirm a user in the AWS Console: Cognito → User Pools → Users → select the user → Actions → Confirm Account.
+```bash
+curl -X POST https://YOUR_API_URL/vendors \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Example Vendor"}'
+```
 
-To avoid this during testing, ensure `autoVerify: { email: true }` is set on the `UserPool` construct in `backend-stack.ts`.
+## 🐛 Troubleshooting
 
----
+### 502 Bad Gateway
 
-**401 Unauthorized after deployment**
+If a Lambda request returns `502 Bad Gateway`, check the Lambda logs in **Amazon CloudWatch**.
 
-Verify two things: the `Authorization` header is present on the request (check Chrome DevTools → Network → Request Headers), and `authorizationType: apigateway.AuthorizationType.COGNITO` is set on each protected method in the CDK stack.
+Common causes include:
 
----
+* Incorrect Lambda handler path
+* Missing environment variables
+* Runtime errors
+* Incorrect DynamoDB permissions
 
-## Cleanup
+### 401 Unauthorized
 
-To remove all AWS resources created by this project and avoid ongoing charges:
+Check:
+
+* The JWT token is being sent.
+* The `Authorization` header is present.
+* The token has not expired.
+* The Cognito User Pool configuration is correct.
+* The API Gateway Cognito authorizer is configured correctly.
+
+### Cognito User Stuck as Unconfirmed
+
+If email verification is enabled, the user must confirm their email before signing in.
+
+For development testing, users can be manually confirmed through the Cognito console.
+
+## 🧹 Cleanup
+
+To remove the AWS resources created by the project:
 
 ```bash
 cd backend
 cdk destroy
 ```
 
-CDK will prompt for confirmation before deleting. The S3 bucket and DynamoDB table are configured with `RemovalPolicy.DESTROY` and `autoDeleteObjects: true` for development convenience. They will be permanently deleted along with all data.
+This helps prevent unnecessary AWS charges.
 
-> This removal policy is intentional for a learning project. Change it to `RemovalPolicy.RETAIN` in `backend-stack.ts` before using this in any environment with real data.
+> **Important:** Destroying the stack can permanently delete project data depending on the configured removal policies. Do not use destructive removal policies for production databases containing important data.
 
-<!-- ---
+## 🎯 Learning Objectives
 
-## Full Tutorial
+This project was built to gain practical experience with:
 
-This repository is the reference implementation for the tutorial:
+* React/Next.js development
+* REST API development
+* Serverless architecture
+* AWS Lambda
+* Amazon DynamoDB
+* Amazon Cognito
+* API Gateway authorization
+* JWT authentication
+* AWS CDK
+* Infrastructure as Code
+* S3 and CloudFront deployment
+* IAM permissions
+* CloudWatch debugging
+* AWS application deployment
 
-**[[Build a Fullstack vendor management app using React, AWS and CDK](https://techwriterb.medium.com/build-a-full-stack-vendor-management-app-using-react-aws-and-cdk-51941832c566)]**
+## 🔮 Future Improvements
 
-The article covers every step from AWS account setup through CDK deployment, authentication, and CloudFront hosting, with explanations of each architectural decision. -->
+Possible improvements include:
+
+* [ ] Protect the GET `/vendors` endpoint
+* [ ] Add vendor update functionality
+* [ ] Add vendor search and filtering
+* [ ] Add pagination
+* [ ] Add input validation
+* [ ] Add automated unit and integration tests
+* [ ] Add CI/CD with GitHub Actions
+* [ ] Add CloudWatch monitoring and alarms
+* [ ] Add DynamoDB indexes for advanced queries
+* [ ] Improve error handling and user notifications
+
+## 📌 Project Purpose
+
+This project is primarily a **learning and portfolio project** demonstrating how a modern React application can be connected to a serverless AWS backend using Infrastructure as Code.
+
+It is designed to demonstrate practical knowledge of **React/Next.js, Node.js/TypeScript, REST APIs, authentication, AWS services, and cloud deployment**.
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
+---
+
+⭐ If you find this project useful, feel free to star the repository.
